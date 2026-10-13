@@ -1,4 +1,6 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', 'index.env') });
+
 const express = require('express');
 const connectDB = require('./config/db');
 const productRoutes = require('./routes/productRoutes');
@@ -10,7 +12,6 @@ connectDB();
 
 app.get('/', (req, res) => res.send('API Ecommerce en marxa'));
 
-// Todas las rutas de productRoutes cuelgan de /api/products
 app.use('/api/products', productRoutes);
 
 const PORT = process.env.PORT || 3000;

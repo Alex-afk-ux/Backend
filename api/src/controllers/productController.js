@@ -3,10 +3,10 @@ const productService = require('../services/productService');
 // CREAR
 const createProduct = async (req, res) => {
   try {
-    const product = await productService.createProduct(req.body); // req.body = datos que envía el cliente
-    res.status(201).json({ status: 'success', data: product });   // 201 = creado
+    const product = await productService.createProduct(req.body);
+    res.status(201).json({ status: 'success', data: product });
   } catch (error) {
-    res.status(400).json({ status: 'error', message: error.message }); // 400 = datos incorrectos
+    res.status(400).json({ status: 'error', message: error.message });
   }
 };
 
@@ -14,18 +14,18 @@ const createProduct = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const products = await productService.getProducts();
-    res.status(200).json({ status: 'success', data: products }); // 200 = todo bien
+    res.status(200).json({ status: 'success', data: products });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message }); // 500 = error del servidor
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
 // OBTENER UNO
 const getProductById = async (req, res) => {
   try {
-    const product = await productService.getProductById(req.params.id); // req.params.id = el id de la URL
+    const product = await productService.getProductById(req.params.id);
     if (!product) {
-      return res.status(404).json({ status: 'error', message: 'Producte no trobat' }); // 404 = no existe
+      return res.status(404).json({ status: 'error', message: 'Producte no trobat' });
     }
     res.status(200).json({ status: 'success', data: product });
   } catch (error) {

@@ -1,29 +1,30 @@
 const Product = require('../models/Product');
 
-// CREAR un producto
+// CREAR
 const createProduct = async (productData) => {
   const newProduct = new Product(productData);
-  return await newProduct.save(); // guarda en la base de datos
+  return await newProduct.save();
 };
 
-// OBTENER todos los productos
+// OBTENER TODOS
 const getProducts = async () => {
-  return await Product.find(); // busca todos
+  return await Product.find();
 };
 
-// OBTENER un producto por su id
+// OBTENER UNO
 const getProductById = async (id) => {
   return await Product.findById(id);
 };
 
-// MODIFICAR un producto
+// MODIFICAR
 const updateProduct = async (id, productData) => {
   return await Product.findByIdAndUpdate(id, productData, {
-    new: true,           // devuelve el producto ya cambiado
+    new: true,
+    runValidators: true,
   });
 };
 
-// BORRAR un producto
+// BORRAR
 const deleteProduct = async (id) => {
   return await Product.findByIdAndDelete(id);
 };
