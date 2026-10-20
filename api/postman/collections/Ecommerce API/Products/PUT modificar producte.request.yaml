@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/api/products/{{productId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "price": 15,
+      "stock": 8
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => { pm.response.to.have.status(200); });
+      pm.test("Preu actualitzat", () => { pm.expect(pm.response.json().data.price).to.eql(15); });
+    language: text/javascript
+order: 4000

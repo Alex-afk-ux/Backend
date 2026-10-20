@@ -8,12 +8,12 @@ const createProduct = async (productData) => {
 
 // OBTENER TODOS
 const getProducts = async () => {
-  return await Product.find();
+  return await Product.find().populate('category');
 };
 
 // OBTENER UNO
 const getProductById = async (id) => {
-  return await Product.findById(id);
+  return await Product.findById(id).populate('category');
 };
 
 // MODIFICAR
@@ -21,7 +21,7 @@ const updateProduct = async (id, productData) => {
   return await Product.findByIdAndUpdate(id, productData, {
     new: true,
     runValidators: true,
-  });
+  }).populate('category');
 };
 
 // BORRAR

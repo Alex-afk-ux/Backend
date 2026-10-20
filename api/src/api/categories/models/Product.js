@@ -46,6 +46,11 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: [30, 'El color no pot superar els 30 caràcters'],
     },
+    // Referència a la categoria (ObjectId + ref)
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+    },
   },
   { timestamps: true }
 );
