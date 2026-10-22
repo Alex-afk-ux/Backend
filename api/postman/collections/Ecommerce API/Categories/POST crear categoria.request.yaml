@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/api/categories"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Impermeables",
+      "slug": "{{categorySlug}}",
+      "description": "Xubasquers per a peixos",
+      "active": true
+    }
+scripts:
+  - type: beforeRequest
+    code: pm.collectionVariables.set("categorySlug", "impermeables-" + Date.now());
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", () => { pm.response.to.have.status(201); });
+      const json = pm.response.json();
+      pm.test("Categoria creada amb active=true", () => pm.expect(json.data.active).to.eql(true));
+      pm.collectionVariables.set("categoryId", json.data._id);
+    language: text/javascript
+order: 1000

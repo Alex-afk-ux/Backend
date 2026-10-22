@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Anna Prova",
+      "email": "{{userEmail}}",
+      "password": "contrasenya-segura-1"
+    }
+scripts:
+  - type: beforeRequest
+    code: pm.collectionVariables.set("userEmail", "anna" + Date.now() + "@prova.cat");
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", () => { pm.response.to.have.status(201); });
+      const json = pm.response.json();
+      pm.test("role és client", () => pm.expect(json.data.role).to.eql("client"));
+      pm.test("La resposta no conté passwordHash", () => pm.expect(pm.response.text()).to.not.include("passwordHash"));
+      pm.collectionVariables.set("userId", json.data._id);
+    language: text/javascript
+order: 1000

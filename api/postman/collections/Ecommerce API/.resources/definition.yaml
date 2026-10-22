@@ -2,3 +2,8 @@ $kind: collection
 description: ""
 variables:
   productId: ""
+  categoryId: ""
+  categorySlug: ""
+  productWithCategoryId: ""
+  userId: ""
+  userEmail: ""

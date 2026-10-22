@@ -12,16 +12,16 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "L'email és obligatori"],
-      unique: true,
+      unique: true, // índex únic a MongoDB (no és un validador de Mongoose)
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "L'email no té un format vàlid"],
     },
-    password: {
+    // Només es guarda el hash de bcrypt; mai la contrasenya en text pla
+    passwordHash: {
       type: String,
-      required: [true, 'La contrasenya és obligatòria'],
-      minlength: [6, 'La contrasenya ha de tenir almenys 6 caràcters'],
-      select: false, // no es retorna a les consultes per defecte
+      required: [true, 'El hash de la contrasenya és obligatori'],
+      select: false, // no surt a les consultes (find, findById...)
     },
     role: {
       type: String,
@@ -31,8 +31,22 @@ const userSchema = new mongoose.Schema(
       },
       default: 'client',
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      // select:false no afecta un document recent creat amb save();
+      // aquesta transformació assegura que passwordHash no surt mai a res.json()
+      transform: (doc, ret) => {
+        delete ret.passwordHash;
+        return ret;
+      },
+    },
+  }
 );
 
 module.exports = mongoose.model('User', userSchema);

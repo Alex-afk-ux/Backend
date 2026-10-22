@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/products"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Xubasquero Betta",
+      "price": 12.5,
+      "stock": 10,
+      "targetSpecies": "betta",
+      "size": "S",
+      "color": "blau"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", () => { pm.response.to.have.status(201); });
+      const json = pm.response.json();
+      pm.test("Retorna el producte creat", () => pm.expect(json.data).to.have.property("_id"));
+      pm.collectionVariables.set("productId", json.data._id);
+    language: text/javascript
+order: 1000

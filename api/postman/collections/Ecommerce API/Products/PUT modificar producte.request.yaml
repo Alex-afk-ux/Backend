@@ -14,6 +14,6 @@ scripts:
   - type: afterResponse
     code: |-
       pm.test("Status code is 200", () => { pm.response.to.have.status(200); });
-      pm.test("Preu actualitzat", () => { pm.expect(pm.response.json().data.price).to.eql(15); });
+      pm.test("Preu actualitzat", () => pm.expect(pm.response.json().data.price).to.eql(15));
     language: text/javascript
 order: 4000

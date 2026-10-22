@@ -7,20 +7,18 @@ body:
   type: json
   content: |-
     {
-      "name": "Xubasquero Betta",
+      "name": "Xubasquero amb categoria",
       "price": 12.5,
       "stock": 10,
       "targetSpecies": "betta",
       "size": "S",
-      "color": "blau"
+      "color": "blau",
+      "category": "{{categoryId}}"
     }
 scripts:
   - type: afterResponse
     code: |-
       pm.test("Status code is 201", () => { pm.response.to.have.status(201); });
-      pm.test("Response is JSON", () => { pm.response.to.be.json; });
-      const json = pm.response.json();
-      pm.test("Retorna el producte creat", () => { pm.expect(json.data).to.have.property("_id"); });
-      pm.collectionVariables.set("productId", json.data._id);
+      pm.collectionVariables.set("productWithCategoryId", pm.response.json().data._id);
     language: text/javascript
-order: 1000
+order: 8000

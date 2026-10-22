@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/{{userId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Anna Modificada"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", () => { pm.response.to.have.status(200); });
+      pm.test("Nom canviat", () => pm.expect(pm.response.json().data.name).to.eql("Anna Modificada"));
+      pm.test("La resposta no conté passwordHash", () => pm.expect(pm.response.text()).to.not.include("passwordHash"));
+    language: text/javascript
+order: 7000

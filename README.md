@@ -1,19 +1,30 @@
 # Backend
-Nom del projecte: E-commerce Full Stack
 
-Tecnologies: React, Node.js/Express, MongoDB, Docker
-Autor (nom complet teu)
+**Nom del projecte:** E-commerce Full Stack (xubasquers per a peixos)
 
-Com executar el projecte (instruccions inicials)
+**Tecnologies:** React, Node.js/Express, MongoDB (Mongoose), Docker, bcrypt i Postman
 
-## 🐳 Base de datos con Docker
+**Autor:** (nom complet teu)
+
+API REST del backend de la botiga: CRUD de productes, categories i usuaris, amb validacions, gestió centralitzada d'errors, filtres, ordenació i paginació.
+
+> ⚠️ **Avís de seguretat:** encara no hi ha autenticació (JWT) ni control de rols (RBAC).
+> Els endpoints, sobretot `/api/users`, **només s'han d'executar en local i amb dades fictícies**.
+> No s'han de desplegar públicament. El registre públic es traslladarà més endavant a
+> `/api/auth/register` i la gestió administrativa quedarà protegida.
+
+## Com executar el projecte
+
+### Requisits
+- Node.js
+- Docker Desktop instal·lat i en execució
+- Postman i MongoDB Compass (per provar l'API i comprovar la base de dades)
+
+### 1. 🐳 Base de datos con Docker
 
 La base de datos MongoDB se levanta con Docker Compose.
 
-### Requisitos
-- Docker Desktop instalado y en ejecución
-
-### Arrancar MongoDB
+**Arrancar MongoDB**
 ```bash
 cd Docker
 docker compose up -d
@@ -21,181 +32,54 @@ docker compose up -d
 
 Esto crea el contenedor `mongo-1` y expone MongoDB en el puerto `27017`.
 
-### Comprobar que está funcionando
+**Comprobar que está funcionando**
 ```bash
 docker ps
 ```
 
 Deberías ver el contenedor `mongo-1` con el puerto `27017:27017`.
 
-### Parar el contenedor
+**Parar el contenedor**
 ```bash
 docker compose down
 ```
 
-### Cadena de conexión
+**Cadena de conexión**
 ```
-mongodb://root:example@localhost:27017/<nombre_base_de_datos>?authSource=admin
+mongodb://<usuari>:<contrasenya>@localhost:27017/<nombre_base_de_datos>?authSource=admin
 ```
+(L'usuari i la contrasenya són els definits a `Docker/docker-compose.yml`.)
 
-## 🚀 API (Node.js / Express)
+### 2. Variables d'entorn
 
-La API usa Express 5 y Mongoose para conectarse a MongoDB.
-
-### Requisitos
-- Node.js instalado
-- MongoDB levantado (ver sección anterior)
-
-### Configuración
-Crea el archivo `api/index.env` con las variables de entorno:
+Copia `api/.env.example` com a `api/index.env` i omple els valors:
 ```
 PORT=3000
-MONGO_URI=mongodb://root:example@localhost:27017/ecommerce?authSource=admin
+MONGO_URI=mongodb://<usuari>:<contrasenya>@localhost:27017/<nom_base_de_dades>?authSource=admin
 ```
+`index.env` està al `.gitignore` i no es puja al repositori.
 
-> `index.env` está en el `.gitignore`, no se sube al repositorio.
+### 3. Instal·lar i arrencar l'API
 
-### Instalar dependencias
 ```bash
 cd api
 npm install
-```
-
-### Arrancar la API en modo desarrollo
-```bash
 npm run dev
 ```
+Ha de sortir «Servidor escoltant al port 3000» i «MongoDB connectat correctament».
 
-Arranca el servidor con `nodemon` en `http://localhost:3000`. Si todo va bien verás en consola:
-```
-MongoDB connectat correctament
-Servidor escoltant al port 3000
-```
+### 4. Dades de prova (opcional)
 
-### Endpoints de productos
+Per veure els filtres i la paginació en funcionament, el projecte inclou un script que crea **25 categories i 25 usuaris fictícios** (un de cada quatre inactiu, amb dates de creació diferents):
 
-Base: `/api/products`
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/products` | Crear un producto |
-| GET | `/api/products` | Obtener todos los productos |
-| GET | `/api/products/:id` | Obtener un producto por id |
-| PUT | `/api/products/:id` | Modificar un producto |
-| DELETE | `/api/products/:id` | Borrar un producto |
-
-Ejemplo de cuerpo para crear un producto:
-```json
-{
-  "name": "Chubasquero para pez payaso",
-  "price": 19.99,
-  "stock": 10,
-  "targetSpecies": "Pez payaso",
-  "size": "M",
-  "color": "Amarillo"
-}
+```bash
+npm run seed         # crea les dades de prova
+npm run seed:clean   # elimina només les dades creades per l'script
 ```
 
-Las respuestas siguen siempre el mismo formato:
-```json
-{ "status": "success", "data": { } }
-{ "status": "error", "message": "Producte no trobat" }
-```
+Les categories tenen el slug `seed-...` i els usuaris l'email `seed-user-NN@prova.cat`, per poder-los identificar. La contrasenya fictícia és `contrasenya-segura-1` i es guarda amb hash bcrypt.
 
-## 🗃️ Modelos
-
-### Product
-| Campo | Tipo | Notas |
-|-------|------|-------|
-| `name` | String | Obligatorio |
-| `price` | Number | Obligatorio, mínimo 0 |
-| `stock` | Number | Por defecto 0, mínimo 0 |
-| `targetSpecies` | String | Especie de pez a la que va dirigido |
-| `size` | String | Talla |
-| `color` | String | Color |
-
-### User
-| Campo | Tipo | Notas |
-|-------|------|-------|
-| `name` | String | Obligatorio |
-| `email` | String | Obligatorio, único |
-| `password` | String | Obligatorio, mínimo 6 caracteres |
-| `role` | String | `client` o `admin`, por defecto `client` |
-
-## 🧱 Arquitectura
-
-La API sigue una estructura por capas:
-
-```
-Petición → routes → controllers → services → models → MongoDB
-```
-
-- **routes**: definen las rutas y las asocian a un controlador.
-- **controllers**: gestionan la petición/respuesta HTTP y los códigos de estado.
-- **services**: contienen la lógica de acceso a datos.
-- **models**: esquemas de Mongoose.
-
-## 🔍 Detalle de la carpeta `api/`
-
-### Archivos de configuración
-
-| Archivo | Para qué sirve |
-|---------|----------------|
-| `package.json` | Describe el proyecto y sus dependencias. El script `npm run dev` ejecuta `nodemon src/index.js`. |
-| `package-lock.json` | Fija las versiones exactas instaladas. No se edita a mano. |
-| `index.env` | Variables de entorno: `PORT` (puerto del servidor) y `MONGO_URI` (conexión a MongoDB). |
-| `.gitignore` | Evita subir a Git `node_modules/`, `dist/`, `.env` e `index.env`. |
-
-Dependencias:
-- `express`: framework que crea el servidor y las rutas.
-- `mongoose`: conecta con MongoDB y define los modelos.
-- `dotenv`: lee las variables del archivo `index.env`.
-- `nodemon` (solo desarrollo): reinicia el servidor al guardar cambios.
-
-La variable `MONGO_URI` usa el usuario `root` y la contraseña `example` definidos en `Docker/docker-compose.yml`. El parámetro `authSource=admin` indica a MongoDB que valide el usuario contra la base de datos `admin`.
-
-### Código en `src/`
-
-**`index.js`** es el punto de entrada:
-1. Carga `index.env`.
-2. Crea la app de Express y activa `express.json()` para leer cuerpos JSON.
-3. Llama a `connectDB()`.
-4. Define la ruta `/`, que responde "API Ecommerce en marxa".
-5. Monta las rutas de productos en `/api/products`.
-6. Escucha en el puerto definido en `PORT` (3000 por defecto).
-
-**`config/db.js`** contiene la función `connectDB`, que conecta con `MONGO_URI`. Si falla, muestra el error y cierra el programa con `process.exit(1)`.
-
-### Capas de la API
-
-| Capa | Archivo | Responsabilidad |
-|------|---------|-----------------|
-| Rutas | `routes/productRoutes.js` | Asocia cada método HTTP y ruta con una función del controlador. |
-| Controlador | `controllers/productController.js` | Recibe la petición, llama al servicio y devuelve la respuesta con su código HTTP. |
-| Servicio | `services/productService.js` | Accede a la base de datos a través del modelo, sin nada de HTTP. |
-| Modelo | `models/Product.js`, `models/user.js` | Esquemas de Mongoose con sus validaciones. |
-
-Códigos de estado que devuelve el controlador:
-
-| Código | Cuándo |
-|--------|--------|
-| `201` | Producto creado |
-| `200` | Operación correcta |
-| `400` | Error de validación o id inválido |
-| `404` | Producto no encontrado |
-| `500` | Error del servidor al listar productos |
-
-Operaciones de Mongoose usadas en el servicio: `save`, `find`, `findById`, `findByIdAndUpdate` y `findByIdAndDelete`. En la actualización se usa `new: true` (devuelve el producto ya modificado) y `runValidators: true` (aplica las reglas del esquema también al editar).
-
-> El modelo `User` está definido, pero todavía no tiene rutas, controlador ni servicio.
-
-## 📚 Documentación
-
-- [ADR-001: Base de datos del proyecto](Docs/Adrs/ADR-001-base-de-dades.md): se elige MongoDB (gestionada con Docker) por la flexibilidad del catálogo de productos.
-- [ADR-002: Estructura inicial del proyecto](Docs/Adrs/ADR-002-estructura-projecte.md): se opta por un monorepo con backend y frontend en carpetas separadas.
-- Diagrama de dominio: `Docs/Diagrams/diagrama_domini_chubasqueros_peces.png`
-
-## 📁 Estructura del proyecto
+## 📁 Estructura del projecte
 
 ```
 .
@@ -207,24 +91,170 @@ Operaciones de Mongoose usadas en el servicio: `save`, `find`, `findById`, `find
 │   │   └── ADR-002-estructura-projecte.md
 │   └── Diagrams/
 │       └── diagrama_domini_chubasqueros_peces.png
+├── postman/
+│   ├── ecommerce.postman_collection.json
+│   └── ecommerce_local.postman_environment.json
 ├── api/
 │   ├── node_modules/
 │   ├── src/
 │   │   ├── config/
 │   │   │   └── db.js
 │   │   ├── controllers/
-│   │   │   └── productController.js
+│   │   │   ├── categoryController.js
+│   │   │   ├── productController.js
+│   │   │   └── userController.js
+│   │   ├── middleware/
+│   │   │   └── errorHandler.js
 │   │   ├── models/
+│   │   │   ├── Category.js
 │   │   │   ├── Product.js
 │   │   │   └── user.js
 │   │   ├── routes/
-│   │   │   └── productRoutes.js
+│   │   │   ├── categoryRoutes.js
+│   │   │   ├── productRoutes.js
+│   │   │   └── userRoutes.js
 │   │   ├── services/
-│   │   │   └── productService.js
-│   │   └── index.js
-│   ├── index.env
+│   │   │   ├── categoryService.js
+│   │   │   ├── productService.js
+│   │   │   └── userService.js
+│   │   ├── utils/
+│   │   │   ├── AppError.js
+│   │   │   └── queryParams.js
+│   │   ├── app.js
+│   │   ├── index.js
+│   │   └── seed.js
+│   ├── .env.example
 │   ├── .gitignore
+│   ├── index.env
 │   ├── package-lock.json
 │   └── package.json
 └── README.md
 ```
+
+Cada petició segueix el mateix camí: `routes → controllers → services → models → MongoDB`. L'arrencada (`index.js`) connecta amb MongoDB i engega el servidor; `app.js` configura Express, les rutes i el middleware d'errors.
+
+## Models
+
+- **Product:** `name`, `price`, `stock`, `targetSpecies` (llista tancada), `size` (XS–XL), `color`, `category` (referència a Category) i `timestamps`.
+- **Category:** `name` (mínim 3), `slug` (obligatori i únic), `description` (màxim 500), `active` (per defecte `true`) i `timestamps`.
+- **User:** `name`, `email` (format vàlid i únic), `passwordHash`, `role` (`client`/`admin`), `active` i `timestamps`.
+
+### Exemples de cos de la petició
+
+Categoria:
+```json
+{ "name": "Electrònica", "slug": "electronica", "description": "Dispositius i accessoris", "active": true }
+```
+Usuari:
+```json
+{ "name": "Anna Prova", "email": "anna@prova.cat", "password": "contrasenya-segura-1" }
+```
+
+## Endpoints
+
+| Mètode | Endpoint | Operació |
+|---|---|---|
+| POST | `/api/products` | Crear producte |
+| GET | `/api/products` | Llistar productes (amb la categoria poblada) |
+| GET | `/api/products/:id` | Consultar producte |
+| PUT | `/api/products/:id` | Modificar producte |
+| DELETE | `/api/products/:id` | Eliminar producte (204) |
+| POST | `/api/categories` | Crear categoria |
+| GET | `/api/categories` | Llistar categories (filtres, ordenació i paginació) |
+| GET | `/api/categories/:id` | Consultar categoria |
+| PUT | `/api/categories/:id` | Modificar categoria |
+| DELETE | `/api/categories/:id` | Eliminar categoria (204) |
+| POST | `/api/users` | Crear usuari |
+| GET | `/api/users` | Llistar usuaris (filtres, ordenació i paginació) |
+| GET | `/api/users/:id` | Consultar usuari |
+| PUT | `/api/users/:id` | Modificar usuari |
+| DELETE | `/api/users/:id` | Desactivar usuari (`active=false`, 204) |
+
+## Filtres, ordenació i paginació
+
+`GET /api/categories` i `GET /api/users` accepten aquests paràmetres (tots opcionals):
+
+| Paràmetre | Descripció | Exemple |
+|---|---|---|
+| `active` | Filtra per estat: `true` o `false` | `?active=true` |
+| `name` | Cerca parcial al nom, sense distingir majúscules | `?name=info` |
+| `sort` | Ordena per un camp permès; el prefix `-` indica ordre descendent. Es poden separar diversos camps amb coma | `?sort=name`, `?sort=-createdAt` |
+| `page` | Número de pàgina (enter positiu, per defecte 1) | `?page=2` |
+| `limit` | Resultats per pàgina (enter positiu, per defecte 10, **màxim 100**) | `?limit=5` |
+
+Camps d'ordenació permesos: categories → `name`, `slug`, `active`, `createdAt`, `updatedAt`; usuaris → `name`, `email`, `role`, `active`, `createdAt`, `updatedAt` (mai `passwordHash`).
+
+Exemples: `GET /api/users?name=anna`, `GET /api/users?sort=-createdAt`, `GET /api/users?page=2&limit=5`, `GET /api/categories?active=true&sort=name&page=1&limit=3`.
+
+Resposta:
+```json
+{
+  "success": true,
+  "data": [],
+  "pagination": { "page": 1, "limit": 10, "total": 25, "totalPages": 3 }
+}
+```
+
+- Els valors invàlids retornen un `400 INVALID_QUERY` amb el camp afectat a `details`. Si `limit` supera el màxim, es limita a 100 i la resposta mostra el valor realment aplicat.
+- El text de `name` s'escapa, de manera que `name=a.*` es busca com a text literal.
+- L'ordenació té un desempat per `_id` perquè la paginació sigui estable, i l'ordre alfabètic és en català.
+
+Per generar dades de prova suficients per veure-ho en funcionament, consulta l'apartat «Dades de prova» (`npm run seed`).
+
+## Validacions i gestió d'errors
+
+Tots els errors passen per un middleware global (`src/middleware/errorHandler.js`) i tenen el mateix format. Mai s'envien traces internes ni dades sensibles; la traça d'un error inesperat només es veu a la consola del servidor.
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Les dades no són vàlides",
+    "details": [{ "field": "name", "message": "El nom és obligatori" }]
+  }
+}
+```
+
+Les respostes correctes tenen el format `{ "success": true, "data": ... }`. Eliminar o desactivar retorna `204 No Content` sense cos.
+
+| Codi HTTP | `error.code` | Quan passa |
+|---|---|---|
+| 400 | `INVALID_ID` | ID amb format incorrecte (`/api/categories/123`) |
+| 400 | `FIELDS_NOT_ALLOWED` | El cos conté camps no permesos (`role`, `active`, `passwordHash`) |
+| 400 | `INVALID_QUERY` | Paràmetres de consulta invàlids (`page=0`, `limit=abc`, `sort` no permès, `active=maybe`) |
+| 400 | `NO_FIELDS` | Un `PUT` d'usuari sense cap camp per modificar |
+| 400 | `INVALID_JSON` | El cos de la petició no és un JSON vàlid |
+| 404 | `NOT_FOUND` | El recurs no existeix (usuari, categoria o producte) |
+| 404 | `ROUTE_NOT_FOUND` | La ruta no existeix |
+| 409 | `DUPLICATE_KEY` | Slug de categoria o email d'usuari duplicat (índex únic) |
+| 422 | `VALIDATION_ERROR` | Error de validació (camp obligatori, mínim, format, contrasenya curta...) |
+| 500 | `INTERNAL_ERROR` | Error inesperat del servidor |
+
+Com funciona:
+- Els controladors no tenen `try/catch`: Express 5 envia automàticament al middleware qualsevol error d'una funció `async`.
+- Els errors de Mongoose (`ValidationError`, `CastError`) i el codi `11000` de MongoDB (índex únic) es converteixen a l'estructura anterior.
+- Els errors propis es llancen amb `AppError` (`src/utils/AppError.js`).
+
+## Decisions de seguretat dels usuaris
+
+- La contrasenya (mínim 12 caràcters) es transforma en hash amb **bcrypt**. No es guarda ni es retorna mai en text pla.
+- `passwordHash` no apareix a cap resposta de l'API.
+- El servidor assigna sempre `role = client`. El cos de la petició només pot portar `name`, `email` i `password`; qualsevol altre camp (`role`, `active`, `passwordHash`) es rebutja amb un 400.
+- L'email duplicat es detecta amb l'índex únic de MongoDB (error 11000) i retorna un 409.
+- `DELETE /api/users/:id` fa una baixa lògica (`active=false`); el document es conserva.
+
+## Postman
+
+1. Importa `postman/ecommerce.postman_collection.json` i `postman/ecommerce_local.postman_environment.json`.
+2. Selecciona l'entorn **Ecommerce Local** (`baseUrl = http://localhost:3000`).
+3. Executa les carpetes **Products**, **Categories** i **Users** en ordre (o amb el *Collection Runner*). Les peticions guarden els identificadors en variables de la col·lecció i porten proves automàtiques.
+4. Per exportar la col·lecció: menú de tres punts de «Ecommerce API» → **Export** → **Collection v2.1**, i es desa a `postman/ecommerce.postman_collection.json`. La col·lecció no conté secrets: només la variable `baseUrl` i dades fictícies.
+
+## Documentació
+
+- **`Docs/Adrs/ADR-001-base-de-dades.md`** — Es tria **MongoDB** (via Docker) per la flexibilitat del catàleg, amb atributs heterogenis com talla, color, material impermeable o espècie de peix objectiu.
+- **`Docs/Adrs/ADR-002-estructura-projecte.md`** — Es tria un **monorepo**, amb backend, frontend i documentació en carpetes separades del mateix repositori.
+- **`Docs/Diagrams/diagrama_domini_chubasqueros_peces.png`** — Diagrama de domini (usuaris, comandes, productes i espècies).
+
+![Diagrama de domini](Docs/Diagrams/diagrama_domini_chubasqueros_peces.png)

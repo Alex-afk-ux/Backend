@@ -1,0 +1,2330 @@
+{
+  "info": {
+    "name": "Ecommerce API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "POST crear producte",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Xubasquero Betta\",\n  \"price\": 12.5,\n  \"stock\": 10,\n  \"targetSpecies\": \"betta\",\n  \"size\": \"S\",\n  \"color\": \"blau\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", () => { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"success és true\", () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Retorna el producte creat\", () => pm.expect(json.data).to.have.property(\"_id\"));",
+                  "pm.collectionVariables.set(\"productId\", json.data._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST producte amb dades invàlides (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"X\",\n  \"price\": -5,\n  \"targetSpecies\": \"tiburó\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422\", () => { pm.response.to.have.status(422); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és VALIDATION_ERROR\", () => pm.expect(json.error.code).to.eql(\"VALIDATION_ERROR\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });",
+                  "pm.test(\"details té camps\", () => pm.expect(pm.response.json().error.details).to.be.an(\"array\").that.is.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET llistar productes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"success és true\", () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "pm.test(\"data és un array\", () => pm.expect(pm.response.json().data).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET producte per id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET producte amb id invàlid (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "123"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_ID\", () => pm.expect(json.error.code).to.eql(\"INVALID_ID\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT modificar producte",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 15,\n  \"stock\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"Preu actualitzat\", () => pm.expect(pm.response.json().data.price).to.eql(15));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE esborrar producte (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET producte esborrat (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => { pm.response.to.have.status(404); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és NOT_FOUND\", () => pm.expect(json.error.code).to.eql(\"NOT_FOUND\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "POST crear categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Impermeables\",\n  \"slug\": \"{{categorySlug}}\",\n  \"description\": \"Xubasquers per a peixos\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"categorySlug\", \"impermeables-\" + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", () => { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"success és true\", () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"Categoria creada amb active=true\", () => pm.expect(json.data.active).to.eql(true));",
+                  "pm.collectionVariables.set(\"categoryId\", json.data._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST categoria sense nom (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"sense-nom-{{categorySlug}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422\", () => { pm.response.to.have.status(422); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és VALIDATION_ERROR\", () => pm.expect(json.error.code).to.eql(\"VALIDATION_ERROR\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });",
+                  "pm.test(\"details inclou el camp name\", () => pm.expect(pm.response.json().error.details.map(d => d.field)).to.include(\"name\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST categoria slug duplicat (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Impermeables\",\n  \"slug\": \"{{categorySlug}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409\", () => { pm.response.to.have.status(409); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és DUPLICATE_KEY\", () => pm.expect(json.error.code).to.eql(\"DUPLICATE_KEY\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET llistar categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"success és true\", () => pm.expect(pm.response.json().success).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?active=true",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Tots actius\", () => pm.response.json().data.forEach(i => pm.expect(i.active).to.eql(true)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?active=false",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?active=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Tots inactius\", () => pm.response.json().data.forEach(i => pm.expect(i.active).to.eql(false)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?name=imperm",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?name=imperm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "imperm"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Tots contenen el text a name\", () => pm.response.json().data.forEach(i => pm.expect(i.name.toLowerCase()).to.include(\"imperm\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?sort=name (ascendent)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?sort=name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "name"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Ordenat per name ascendent\", () => { const n = pm.response.json().data.map(i => i.name.toLowerCase()); pm.expect(n).to.eql([...n].sort((a, b) => a.localeCompare(b, \"ca\"))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?sort=-createdAt (més nou primer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?sort=-createdAt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "-createdAt"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Ordenat per createdAt descendent\", () => { const d = pm.response.json().data.map(i => i.createdAt); pm.expect(d).to.eql([...d].sort().reverse()); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?page=2&limit=5",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?page=2&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"page=2 i limit=5\", () => { const p = pm.response.json().pagination; pm.expect(p.page).to.eql(2); pm.expect(p.limit).to.eql(5); });",
+                  "pm.test(\"totalPages = ceil(total / limit)\", () => { const p = pm.response.json().pagination; pm.expect(p.totalPages).to.eql(Math.ceil(p.total / p.limit)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET combinat (active + name + sort + paginació)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?active=true&name=imperm&sort=name&page=1&limit=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                },
+                {
+                  "key": "name",
+                  "value": "imperm"
+                },
+                {
+                  "key": "sort",
+                  "value": "name"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "3"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?limit=1000 (es limita a 100)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?limit=1000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "1000"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"limit queda limitat a 100\", () => pm.expect(pm.response.json().pagination.limit).to.eql(100));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?page=0 (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?page=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_QUERY\", () => pm.expect(json.error.code).to.eql(\"INVALID_QUERY\"));",
+                  "pm.test(\"details assenyala page\", () => pm.expect(json.error.details.map(d => d.field)).to.include(\"page\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?limit=abc (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?limit=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "abc"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_QUERY\", () => pm.expect(json.error.code).to.eql(\"INVALID_QUERY\"));",
+                  "pm.test(\"details assenyala limit\", () => pm.expect(json.error.details.map(d => d.field)).to.include(\"limit\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?active=maybe (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?active=maybe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "maybe"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_QUERY\", () => pm.expect(json.error.code).to.eql(\"INVALID_QUERY\"));",
+                  "pm.test(\"details assenyala active\", () => pm.expect(json.error.details.map(d => d.field)).to.include(\"active\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?sort=description (camp no permès, 400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?sort=description",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "description"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_QUERY\", () => pm.expect(json.error.code).to.eql(\"INVALID_QUERY\"));",
+                  "pm.test(\"details assenyala sort\", () => pm.expect(json.error.details.map(d => d.field)).to.include(\"sort\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET categoria per id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "{{categoryId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET categoria amb id invàlid (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "123"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_ID\", () => pm.expect(json.error.code).to.eql(\"INVALID_ID\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT modificar categoria",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "{{categoryId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Descripció modificada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"Descripció canviada\", () => pm.expect(pm.response.json().data.description).to.eql(\"Descripció modificada\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST producte amb categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Xubasquero amb categoria\",\n  \"price\": 12.5,\n  \"stock\": 10,\n  \"targetSpecies\": \"betta\",\n  \"size\": \"S\",\n  \"color\": \"blau\",\n  \"category\": \"{{categoryId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", () => { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.collectionVariables.set(\"productWithCategoryId\", pm.response.json().data._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET producte amb categoria poblada (populate)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productWithCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productWithCategoryId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"category és un objecte amb nom i slug\", () => { const c = pm.response.json().data.category; pm.expect(c).to.be.an(\"object\"); pm.expect(c).to.have.property(\"name\"); pm.expect(c).to.have.property(\"slug\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE producte amb categoria (neteja)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productWithCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productWithCategoryId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE esborrar categoria (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "{{categoryId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET categoria esborrada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "{{categoryId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => { pm.response.to.have.status(404); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és NOT_FOUND\", () => pm.expect(json.error.code).to.eql(\"NOT_FOUND\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "POST crear usuari",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Anna Prova\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"contrasenya-segura-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"userEmail\", \"anna\" + Date.now() + \"@prova.cat\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", () => { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"success és true\", () => pm.expect(pm.response.json().success).to.eql(true));",
+                  "const json = pm.response.json();",
+                  "pm.test(\"role és client\", () => pm.expect(json.data.role).to.eql(\"client\"));",
+                  "pm.test(\"La resposta no conté passwordHash\", () => pm.expect(pm.response.text()).to.not.include(\"passwordHash\"));",
+                  "pm.collectionVariables.set(\"userId\", json.data._id);",
+                  "pm.test(\"No exposa passwordHash (cap element)\", () => { const response = pm.response.json(); const items = Array.isArray(response.data) ? response.data : [response.data]; items.forEach((item) => pm.expect(item).to.not.have.property(\"passwordHash\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST usuari email duplicat (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Anna Duplicada\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"contrasenya-segura-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409\", () => { pm.response.to.have.status(409); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és DUPLICATE_KEY\", () => pm.expect(json.error.code).to.eql(\"DUPLICATE_KEY\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST usuari amb contrasenya curta (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Curt\",\n  \"email\": \"curt{{userEmail}}\",\n  \"password\": \"curta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422\", () => { pm.response.to.have.status(422); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és VALIDATION_ERROR\", () => pm.expect(json.error.code).to.eql(\"VALIDATION_ERROR\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST usuari amb email invàlid (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mal\",\n  \"email\": \"no-es-un-email\",\n  \"password\": \"contrasenya-segura-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422\", () => { pm.response.to.have.status(422); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és VALIDATION_ERROR\", () => pm.expect(json.error.code).to.eql(\"VALIDATION_ERROR\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST usuari amb role al body (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin\",\n  \"email\": \"admin{{userEmail}}\",\n  \"password\": \"contrasenya-segura-1\",\n  \"role\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és FIELDS_NOT_ALLOWED\", () => pm.expect(json.error.code).to.eql(\"FIELDS_NOT_ALLOWED\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET llistar usuaris",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"La resposta no conté passwordHash\", () => pm.expect(pm.response.text()).to.not.include(\"passwordHash\"));",
+                  "pm.test(\"No exposa passwordHash (cap element)\", () => { const response = pm.response.json(); const items = Array.isArray(response.data) ? response.data : [response.data]; items.forEach((item) => pm.expect(item).to.not.have.property(\"passwordHash\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?active=true",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Tots actius\", () => pm.response.json().data.forEach(i => pm.expect(i.active).to.eql(true)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?active=false",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?active=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Tots inactius\", () => pm.response.json().data.forEach(i => pm.expect(i.active).to.eql(false)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?name=anna",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?name=anna",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "anna"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Tots contenen el text a name\", () => pm.response.json().data.forEach(i => pm.expect(i.name.toLowerCase()).to.include(\"anna\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?sort=name (ascendent)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?sort=name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "name"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Ordenat per name ascendent\", () => { const n = pm.response.json().data.map(i => i.name.toLowerCase()); pm.expect(n).to.eql([...n].sort((a, b) => a.localeCompare(b, \"ca\"))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?sort=-createdAt (més nou primer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?sort=-createdAt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "-createdAt"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"Ordenat per createdAt descendent\", () => { const d = pm.response.json().data.map(i => i.createdAt); pm.expect(d).to.eql([...d].sort().reverse()); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?page=2&limit=5",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=2&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"page=2 i limit=5\", () => { const p = pm.response.json().pagination; pm.expect(p.page).to.eql(2); pm.expect(p.limit).to.eql(5); });",
+                  "pm.test(\"totalPages = ceil(total / limit)\", () => { const p = pm.response.json().pagination; pm.expect(p.totalPages).to.eql(Math.ceil(p.total / p.limit)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET combinat (active + name + sort + paginació)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?active=true&name=anna&sort=name&page=1&limit=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                },
+                {
+                  "key": "name",
+                  "value": "anna"
+                },
+                {
+                  "key": "sort",
+                  "value": "name"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "3"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?limit=1000 (es limita a 100)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?limit=1000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "1000"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"data és un array\", () => pm.expect(json.data).to.be.an(\"array\"));",
+                  "pm.test(\"pagination té page, limit, total i totalPages\", () => { const p = pm.response.json().pagination; pm.expect(p).to.have.all.keys(\"page\", \"limit\", \"total\", \"totalPages\"); });",
+                  "pm.test(\"data no supera el limit\", () => pm.expect(json.data.length).to.be.at.most(json.pagination.limit));",
+                  "pm.test(\"limit queda limitat a 100\", () => pm.expect(pm.response.json().pagination.limit).to.eql(100));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?page=0 (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_QUERY\", () => pm.expect(json.error.code).to.eql(\"INVALID_QUERY\"));",
+                  "pm.test(\"details assenyala page\", () => pm.expect(json.error.details.map(d => d.field)).to.include(\"page\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?limit=abc (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?limit=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "abc"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_QUERY\", () => pm.expect(json.error.code).to.eql(\"INVALID_QUERY\"));",
+                  "pm.test(\"details assenyala limit\", () => pm.expect(json.error.details.map(d => d.field)).to.include(\"limit\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?active=maybe (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?active=maybe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "maybe"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_QUERY\", () => pm.expect(json.error.code).to.eql(\"INVALID_QUERY\"));",
+                  "pm.test(\"details assenyala active\", () => pm.expect(json.error.details.map(d => d.field)).to.include(\"active\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET ?sort=passwordHash (camp no permès, 400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?sort=passwordHash",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "passwordHash"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_QUERY\", () => pm.expect(json.error.code).to.eql(\"INVALID_QUERY\"));",
+                  "pm.test(\"details assenyala sort\", () => pm.expect(json.error.details.map(d => d.field)).to.include(\"sort\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET usuari per id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"La resposta no conté passwordHash\", () => pm.expect(pm.response.text()).to.not.include(\"passwordHash\"));",
+                  "pm.test(\"No exposa passwordHash (cap element)\", () => { const response = pm.response.json(); const items = Array.isArray(response.data) ? response.data : [response.data]; items.forEach((item) => pm.expect(item).to.not.have.property(\"passwordHash\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT modificar usuari",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Anna Modificada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"Nom canviat\", () => pm.expect(pm.response.json().data.name).to.eql(\"Anna Modificada\"));",
+                  "pm.test(\"La resposta no conté passwordHash\", () => pm.expect(pm.response.text()).to.not.include(\"passwordHash\"));",
+                  "pm.test(\"No exposa passwordHash (cap element)\", () => { const response = pm.response.json(); const items = Array.isArray(response.data) ? response.data : [response.data]; items.forEach((item) => pm.expect(item).to.not.have.property(\"passwordHash\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT camp no permès (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és FIELDS_NOT_ALLOWED\", () => pm.expect(json.error.code).to.eql(\"FIELDS_NOT_ALLOWED\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE desactivar usuari (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET usuari desactivat (continua existint)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "pm.test(\"active és false\", () => pm.expect(pm.response.json().data.active).to.eql(false));",
+                  "pm.test(\"La resposta no conté passwordHash\", () => pm.expect(pm.response.text()).to.not.include(\"passwordHash\"));",
+                  "pm.test(\"No exposa passwordHash (cap element)\", () => { const response = pm.response.json(); const items = Array.isArray(response.data) ? response.data : [response.data]; items.forEach((item) => pm.expect(item).to.not.have.property(\"passwordHash\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET usuari inexistent (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/507f1f77bcf86cd799439011",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "507f1f77bcf86cd799439011"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => { pm.response.to.have.status(404); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és NOT_FOUND\", () => pm.expect(json.error.code).to.eql(\"NOT_FOUND\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET usuari amb id invàlid (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "123"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => { pm.response.to.have.status(400); });",
+                  "pm.test(\"Response is JSON\", () => { pm.response.to.be.json; });",
+                  "const json = pm.response.json();",
+                  "pm.test(\"success és false\", () => pm.expect(json.success).to.eql(false));",
+                  "pm.test(\"error.code és INVALID_ID\", () => pm.expect(json.error.code).to.eql(\"INVALID_ID\"));",
+                  "pm.test(\"No s'exposen traces internes\", () => { const t = pm.response.text(); pm.expect(t).to.not.include(\"stack\"); pm.expect(t).to.not.include(\"node_modules\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "categorySlug",
+      "value": ""
+    },
+    {
+      "key": "productWithCategoryId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "userEmail",
+      "value": ""
+    }
+  ]
+}
