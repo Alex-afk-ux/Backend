@@ -1,16 +1,12 @@
-const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const AppError = require('../utils/AppError');
+const { validatePassword, hashPassword } = require('../utils/password');
 const { parseListQuery, buildPagination } = require('../utils/queryParams');
 
 // Camps pels quals es pot ordenar (mai passwordHash)
 const SORTABLE_FIELDS = ['name', 'email', 'role', 'active', 'createdAt', 'updatedAt'];
 // Ordenació alfabètica en català, sense distingir majúscules
 const COLLATION = { locale: 'ca', strength: 2 };
-
-const SALT_ROUNDS = 12;
-const MIN_PASSWORD_LENGTH = 12;
-const MAX_PASSWORD_BYTES = 72; // bcrypt ignora tot el que passa de 72 bytes
 
 // Camps que el client pot enviar. role, active i passwordHash MAI vénen del body.
 const CREATE_FIELDS = ['name', 'email', 'password'];
@@ -29,27 +25,12 @@ const assertAllowedFields = (body, allowed) => {
   }
 };
 
-// Error de validació de la contrasenya -> 422
-const passwordError = (message) =>
-  new AppError(422, 'VALIDATION_ERROR', 'Les dades no són vàlides', [
-    { field: 'password', message },
-  ]);
-
-const validatePassword = (password) => {
-  if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
-    throw passwordError(`Ha de tenir almenys ${MIN_PASSWORD_LENGTH} caràcters`);
-  }
-  if (Buffer.byteLength(password, 'utf8') > MAX_PASSWORD_BYTES) {
-    throw passwordError(`No pot superar els ${MAX_PASSWORD_BYTES} bytes`);
-  }
-};
-
 // CREAR
 const createUser = async (body) => {
   assertAllowedFields(body, CREATE_FIELDS);
   validatePassword(body.password);
 
-  const passwordHash = await bcrypt.hash(body.password, SALT_ROUNDS);
+  const passwordHash = await hashPassword(body.password);
 
   const newUser = new User({
     name: body.name,
@@ -88,7 +69,7 @@ const updateUser = async (id, body) => {
   if (body.email !== undefined) changes.email = body.email;
   if (body.password !== undefined) {
     validatePassword(body.password);
-    changes.passwordHash = await bcrypt.hash(body.password, SALT_ROUNDS);
+    changes.passwordHash = await hashPassword(body.password);
   }
 
   if (Object.keys(changes).length === 0) {

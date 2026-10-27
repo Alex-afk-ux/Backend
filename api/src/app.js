@@ -2,6 +2,7 @@ const express = require('express');
 const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -12,6 +13,7 @@ app.get('/', (req, res) => res.send('API Ecommerce en marxa'));
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 
 // Sempre al final: primer la ruta inexistent i després el gestor global d'errors
 app.use(notFoundHandler);
